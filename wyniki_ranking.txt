@@ -1,0 +1,24 @@
+najlepsze wyniki i najszybciej chyba main2.cpp
+
+pierwsze wyniki 01.12.2025:
+berlin52 -          /  7548.99 (dla 1000 mrówek)
+bier127  - 126507   /  123760.25 (dla 1000 mrówek)  /  119376
+tsp250   - 13636.8  /  13535.2 (dla 1000 mrówek)
+tsp500   - 100432
+tsp1000  - 30415.4
+
+najlepsze 01.12.2025
+berlin52 - 7544.37
+bier127  - 119314
+tsp250   - 12790
+tsp500   - 100432
+tsp1000  - 30415.4
+
+
+
+najlepsze 11.01.2026
+berlin52 - 7544.37
+bier127  - 119308.95 ( alfa = 1.0; beta = 1; rho = 0.7; Q = 10.0 ) / 119924.52 (dla automatycznych)
+tsp250   - 13477.98 (dla automatycznych)  /  13163.59  (po optymalizacji 2-opt przy automatycznych)
+tsp500   - 92509.09 (automatyczne)  /  88720.66 (po optymalizacji 2-opt przy automatycznych)
+tsp1000  - 28536.28 (automatyczne)  /  24490.17 (po optymalizacji 2-opt przy automatycznych)
