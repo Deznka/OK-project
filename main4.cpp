@@ -1,6 +1,3 @@
-// main4.cpp - Zoptymalizowany algorytm mrówkowy ACO dla TSP
-// Cel: jak najlepsze wyniki w max 3 minuty dla instancji do 1000 miast
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -18,10 +15,35 @@
 using namespace std;
 
 // ---------------------------------------------------
+// GENERATOR DANYCH
+// ---------------------------------------------------
+void generujMiasta(int liczbaMiast, const string& nazwaPliku) {
+    ofstream plikWyjsciowy(nazwaPliku);
+
+    if (!plikWyjsciowy.is_open()) {
+        cout << "Blad tworzenia pliku!" << endl;
+        return;
+    }
+
+    srand(time(0));
+
+    plikWyjsciowy << liczbaMiast << endl;
+
+    for (int i = 1; i <= liczbaMiast; i++) {
+        int x = rand() % 2000 + 1;
+        int y = rand() % 2500 + 1;
+        plikWyjsciowy << i << " " << x << " " << y << endl;
+    }
+
+    plikWyjsciowy.close();
+    cout << "Wygenerowano " << liczbaMiast << " miast i zapisano do pliku " << nazwaPliku << endl;
+}
+
+// ---------------------------------------------------
 // GLOBALNE ZMIENNE CZASOWE
 // ---------------------------------------------------
 chrono::steady_clock::time_point globalStartTime;
-const int MAX_TIME_SECONDS = 175; // bezpieczny limit (< 3 min)
+const int MAX_TIME_SECONDS = 175;
 
 bool czasPrzekroczony() {
     auto teraz = chrono::steady_clock::now();
@@ -208,10 +230,6 @@ struct ACOResult {
 ACOParams getAdaptiveParams(int n) {
     ACOParams p;
 
-    // UNIWERSALNE PARAMETRY bazowane na testach
-    // Kluczowe odkrycie: niska beta (1-2) + wysokie rho (0.5-0.8) + niskie Q (10-50)
-    // daje lepsze wyniki niż klasyczne ustawienia (beta=5, rho=0.3, Q=100)
-
     if (n <= 60) {
         // Małe instancje (berlin52)
         p.liczbaMrowek = min(n, 50);
@@ -220,7 +238,7 @@ ACOParams getAdaptiveParams(int n) {
         p.beta = 2.0;      // niska - więcej eksploracji
         p.rho = 0.6;       // wysokie parowanie - szybka adaptacja
         p.Q = 10.0;        // niskie Q
-        p.eliteFactor = 3;
+        p.eliteFactor = 2;
         p.candidateSize = min(20, n - 1);
         p.tauMin = 0.01;
         p.tauMax = 6.0;
@@ -234,7 +252,7 @@ ACOParams getAdaptiveParams(int n) {
         p.beta = 1.0;      // bardzo niska - sprawdzone na bier127
         p.rho = 0.7;       // wysokie parowanie
         p.Q = 10.0;        // niskie Q
-        p.eliteFactor = 3;
+        p.eliteFactor = 2;
         p.candidateSize = min(25, n - 1);
         p.tauMin = 0.01;
         p.tauMax = 5.0;
@@ -248,7 +266,7 @@ ACOParams getAdaptiveParams(int n) {
         p.beta = 1.5;
         p.rho = 0.65;
         p.Q = 15.0;
-        p.eliteFactor = 4;
+        p.eliteFactor = 3;
         p.candidateSize = min(30, n - 1);
         p.tauMin = 0.005;
         p.tauMax = 4.0;
@@ -262,7 +280,7 @@ ACOParams getAdaptiveParams(int n) {
         p.beta = 2.0;
         p.rho = 0.6;
         p.Q = 20.0;
-        p.eliteFactor = 5;
+        p.eliteFactor = 4;
         p.candidateSize = min(35, n - 1);
         p.tauMin = 0.001;
         p.tauMax = 3.0;
@@ -276,7 +294,7 @@ ACOParams getAdaptiveParams(int n) {
         p.beta = 2.5;
         p.rho = 0.55;
         p.Q = 25.0;
-        p.eliteFactor = 6;
+        p.eliteFactor = 4;
         p.candidateSize = min(40, n - 1);
         p.tauMin = 0.0005;
         p.tauMax = 2.5;
@@ -284,17 +302,10 @@ ACOParams getAdaptiveParams(int n) {
     }
 
     // dla bier127
-    // p.liczbaMrowek = min(n, 50);
-    // p.iteracje = 500;
     // p.alfa = 1.0;
     // p.beta = 1;
     // p.rho = 0.7;
     // p.Q = 10.0;
-    // p.eliteFactor = 5;
-    // p.candidateSize = min(20, n - 1);
-    // p.tauMin = 0.01;
-    // p.tauMax = 10.0;
-    // p.opt2Passes = 200;
 
     return p;
 }
@@ -654,7 +665,7 @@ ACOResult multiRunACO(const vector<vector<double>>& D, int n, bool verbose = tru
         if (restartyBezPoprawy >= maxRestartyBezPoprawy) {
             if (verbose) {
                 cout << "\n*** WCZESNE ZATRZYMANIE: brak poprawy przez " << maxRestartyBezPoprawy
-                     << " restartow - prawdopodobnie osiagnieto optimum lokalne ***\n";
+                     << " restartow - osiagnieto optimum lokalne ***\n";
             }
             break;
         }
@@ -736,6 +747,7 @@ int main() {
     cout << "4. tsp500.txt" << endl;
     cout << "5. tsp1000.txt" << endl;
     cout << "6. Podaj wlasna nazwe pliku" << endl;
+    cout << "7. Wygeneruj losowy graf (generator.txt)" << endl;
     cout << "Wybor: ";
 
     int wybor;
@@ -752,6 +764,14 @@ int main() {
             cout << "Podaj nazwe pliku: ";
             cin >> nazwaPliku;
             break;
+        case 7: {
+            int liczba;
+            cout << "Podaj liczbe miast: ";
+            cin >> liczba;
+            generujMiasta(liczba, "generator.txt");
+            nazwaPliku = "generator.txt";
+            break;
+        }
         default:
             cout << "Nieprawidlowy wybor!" << endl;
             return 1;
@@ -785,8 +805,8 @@ int main() {
     cout << "Czas wykonania: " << (czasMs / 1000.0) << " s" << endl;
     cout << "========================================" << endl;
 
-    // Opcjonalnie: wypisz trasę dla małych instancji
     if (n <= 60) {
+        cout << "\nTrasa: ";
         cout << "\nTrasa: ";
         for (int x : wynik.najlepszaTrasa) cout << x << " ";
         cout << wynik.najlepszaTrasa[0] << endl;
